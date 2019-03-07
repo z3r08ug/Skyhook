@@ -5,10 +5,6 @@ import chris.example.com.skyhook.util.BasePresenter;
 import chris.example.com.skyhook.util.BaseView;
 
 
-/**
- * Created by chris on 2/28/2018.
- */
-
 public interface MainContract
 {
     interface  View extends BaseView

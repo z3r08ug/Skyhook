@@ -7,10 +7,6 @@ import retrofit2.http.Body;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
-/**
- * Created by chris on 2/28/2018.
- */
-
 public interface RemoteService
 {
     @Headers({"Content-Type: text/xml",

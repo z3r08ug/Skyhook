@@ -12,8 +12,11 @@ public class RGEOResponse
     @Attribute(name = "version")
     private String version = "2.26";
     
-    @Element(name = "street-address")
+    @Element(name = "street-address", required = false)
     private StreetAddress streetAddress;
+    
+    @Element(name = "error", required = false)
+    private String error;
     
     public StreetAddress getStreetAddress()
     {
@@ -23,6 +26,16 @@ public class RGEOResponse
     public void setStreetAddress(StreetAddress streetAddress)
     {
         this.streetAddress = streetAddress;
+    }
+    
+    public String getError()
+    {
+        return error;
+    }
+    
+    public void setError(String error)
+    {
+        this.error = error;
     }
     
     @Override

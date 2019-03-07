@@ -12,28 +12,28 @@
 
     <RelativeLayout
         android:id="@+id/rlContainer"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="@dimen/width_map"
+        android:layout_height="@dimen/width_map"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/toolbar">
 
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
+            android:layout_width="@dimen/width_map"
+            android:layout_height="@dimen/width_map"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginTop="@dimen/margin_30"
+            android:layout_marginBottom="@dimen/margin_30"
             tools:context="com.example.chris.week5daily1.MapsActivity" />
 
         <ImageView
             android:id="@+id/ivCrosshair"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="@dimen/width"
+            android:layout_height="@dimen/width"
             android:layout_centerInParent="true"
             android:src="@drawable/crosshair"
-            android:contentDescription="Crosshair" />
+            android:contentDescription="@string/crosshair" />
 
     </RelativeLayout>
 
@@ -44,35 +44,34 @@
         android:onClick="getCivic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get Civic"
+        android:text="@string/get_civic"
         android:layout_below="@id/rlContainer"
-        android:layout_marginStart="100dp"/>
+        android:layout_marginStart="@dimen/margin_100"/>
 
     <TextView
         android:id="@+id/tvNumOutstanding"
-        android:layout_width="80dp"
+        android:layout_width="@dimen/width"
         android:layout_height="wrap_content"
-        android:text="Number Outstanding Requests:"
+        android:text="@string/number_outstanding_requests"
         android:textStyle="bold"
         android:layout_below="@id/rlContainer"
         android:layout_toEndOf="@id/btnGetCivic"
-        android:layout_marginStart="30dp"/>
+        android:layout_marginStart="@dimen/margin_30"/>
 
     <TextView
         android:id="@+id/tvNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0"
+        android:text="@string/default_outgoing"
         android:layout_below="@id/tvNumOutstanding"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="150dp"/>
+        android:layout_marginEnd="@dimen/margin_150"/>
 
         <TextView
             android:id="@+id/tvAddresses"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:layout_margin="50dp"
+            android:layout_margin="@dimen/margin_50"
             android:scrollbars="vertical"
             android:scrollbarAlwaysDrawVerticalTrack="true"
             android:layout_below="@id/tvNum"/>

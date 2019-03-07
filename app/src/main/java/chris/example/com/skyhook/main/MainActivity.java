@@ -2,22 +2,25 @@ package chris.example.com.skyhook.main;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import android.text.Selection;
+import android.text.SpannableString;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import javax.inject.Inject;
@@ -42,6 +45,7 @@ public class MainActivity extends FragmentActivity implements MainContract.View,
     private MapViewmodel mapViewmodel;
     private float zoom;
     private LatLng latLng;
+    private boolean hasCoordinates;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,60 +62,113 @@ public class MainActivity extends FragmentActivity implements MainContract.View,
     private void bindViews()
     {
         mapViewmodel = ViewModelProviders.of(this).get(MapViewmodel.class);
+        hasCoordinates = false;
         
-        addresses = mapViewmodel.getAddresses();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        zoom = preferences.getFloat("zoom", -1f);
+        addresses = preferences.getString("addresses", "");
+        
+        String latitude = preferences.getString("lat", "");
+        String longitude = preferences.getString("lon", "");
+        
+        if (zoom == -1)
+        {
+            zoom = mapViewmodel.getZoom();
+        }
+        if (addresses.isEmpty())
+        {
+            addresses = mapViewmodel.getAddresses();
+        }
+        if (latitude.isEmpty() && longitude.isEmpty())
+        {
+            latLng = mapViewmodel.getLatLng();
+        }
+        else
+        {
+            hasCoordinates = true;
+            latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+        }
+        
         numOutgoing = 0;
-        zoom = mapViewmodel.getZoom();
-        latLng = mapViewmodel.getLatLng();
         
         tvNum = findViewById(R.id.tvNum);
         tvAddresses = findViewById(R.id.tvAddresses);
-        tvAddresses.setText(mapViewmodel.getAddresses());
+        tvAddresses.setMovementMethod(new ScrollingMovementMethod());
+    
+        SpannableString spannable = new SpannableString(addresses);
+        Selection.setSelection(spannable, spannable.length());
+        tvAddresses.setText(spannable, TextView.BufferType.SPANNABLE);
     
         tvNum.setText(String.valueOf(numOutgoing));
     
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment != null)
+        {
+            mapFragment.getMapAsync(this);
+        }
     }
     
     @Override
     public void showError(String error)
     {
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "showError: Error: " + error);
+        numOutgoing--;
+        tvNum.setText(String.valueOf(numOutgoing));
     }
     
     @Override
     protected void onDestroy()
     {
         super.onDestroy();
-        mapViewmodel.setZoom(googleMap.getCameraPosition().zoom);
+        latLng = googleMap.getCameraPosition().target;
+        zoom = googleMap.getCameraPosition().zoom;
+        
+        mapViewmodel.setZoom(zoom);
         mapViewmodel.setAddresses(addresses);
-        mapViewmodel.setLatLng(googleMap.getCameraPosition().target);
+        mapViewmodel.setLatLng(latLng);
+    
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putFloat("zoom", zoom);
+        editor.putString("lat", String.valueOf(latLng.latitude));
+        editor.putString("lon", String.valueOf(latLng.longitude));
+        editor.putString("addresses", addresses);
+        editor.apply();
+    
         presenter.detachView();
     }
     
     @Override
     public void setAddress(RGEOResponse rgeoResponse)
     {
-        String num = rgeoResponse.getStreetAddress().getStreetNum();
-        if (num == null)
-            num = "";
-        
-        String street = rgeoResponse.getStreetAddress().getAddressLine();
-        if (street == null)
-            street = "";
-        
-        String city = rgeoResponse.getStreetAddress().getCity();
-        if (city == null)
-            city = "";
-        
-        String state = rgeoResponse.getStreetAddress().getState();
-        if (state == null)
-            state = "";
-        addresses += "*" + num + " " + street + ", " + city + ", " + state + "\n";
-        tvAddresses.setText(addresses);
+        if (rgeoResponse.getStreetAddress() != null)
+        {
+            String num = rgeoResponse.getStreetAddress().getStreetNum();
+            if (num == null)
+                num = "";
+    
+            String street = rgeoResponse.getStreetAddress().getAddressLine();
+            if (street == null)
+                street = "";
+    
+            String city = rgeoResponse.getStreetAddress().getCity();
+            if (city == null)
+                city = "";
+    
+            String state = rgeoResponse.getStreetAddress().getState();
+            if (state == null)
+                state = "";
+            addresses += "*" + num + " " + street + ", " + city + ", " + state + "\n";
+    
+            SpannableString spannable = new SpannableString(addresses);
+            Selection.setSelection(spannable, spannable.length());
+            tvAddresses.setText(spannable, TextView.BufferType.SPANNABLE);
+        }
+        else
+        {
+            Toast.makeText(this, "That location does not contain a physical address...", Toast.LENGTH_SHORT).show();
+        }
         numOutgoing--;
         tvNum.setText(String.valueOf(numOutgoing));
     }
@@ -168,10 +225,8 @@ public class MainActivity extends FragmentActivity implements MainContract.View,
                 }
                 else
                 {
-                    Log.d(TAG, "onRequestPermissionsResult: denied");
                     checkPermission();
                 }
-                return;
             }
             
             // other 'case' lines to check for other
@@ -192,6 +247,14 @@ public class MainActivity extends FragmentActivity implements MainContract.View,
             googleMap.setMyLocationEnabled(true);
             googleMap.getUiSettings().setCompassEnabled(true);
             googleMap.getUiSettings().setZoomControlsEnabled(true);
+    
+            if (hasCoordinates)
+            {
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(latLng)
+                        .zoom(zoom).build();
+                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            }
         }
     }
 }

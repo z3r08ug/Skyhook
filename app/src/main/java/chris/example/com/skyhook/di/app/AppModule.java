@@ -4,9 +4,6 @@ import chris.example.com.skyhook.data.remote.RemoteDataSource;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * Created by chris on 2/28/2018.
- */
 @Module
 public class AppModule
 {

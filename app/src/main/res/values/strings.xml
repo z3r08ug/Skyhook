@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Skyhook</string>
+    <string name="default_outgoing">0</string>
+    <string name="number_outstanding_requests">Number Outstanding Requests:</string>
+    <string name="get_civic">Get Civic</string>
+    <string name="crosshair">Crosshair</string>
 </resources>

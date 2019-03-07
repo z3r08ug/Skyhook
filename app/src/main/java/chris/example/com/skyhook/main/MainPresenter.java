@@ -1,7 +1,5 @@
 package chris.example.com.skyhook.main;
 
-import android.util.Log;
-
 import javax.inject.Inject;
 
 import chris.example.com.skyhook.data.remote.RemoteDataSource;
@@ -15,10 +13,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-
-/**
- * Created by chris on 2/28/2018.
- */
 
 public class MainPresenter implements MainContract.Presenter
 {
@@ -86,13 +80,14 @@ public class MainPresenter implements MainContract.Presenter
                     @Override
                     public void onError(Throwable e)
                     {
-                        view.showError(e.getMessage());
+                        view.showError("Error retrieving address information for that area.");
                     }
                     
                     @Override
                     public void onComplete()
                     {
-                        view.setAddress(rgeoResponse);
+                        if (view != null)
+                            view.setAddress(rgeoResponse);
                     }
                 });
     }

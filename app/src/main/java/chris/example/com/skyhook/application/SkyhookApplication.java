@@ -11,10 +11,6 @@ import chris.example.com.skyhook.di.main.MainModule;
 import chris.example.com.skyhook.util.Constants;
 
 
-/**
- * Created by chris on 2/28/2018.
- */
-
 public class SkyhookApplication extends Application
 {
     private AppComponent appComponent;
